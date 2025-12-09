@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Workout & Diet Planner</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f9fafb;
+
+      /* Gym background image */
+      background-image: url("https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .overlay {
+      min-height: 100vh;
+      background: rgba(15, 23, 42, 0.92);
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Left column */
+    .calendar-wrapper {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .month-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .nav-btn {
+      background: #0f172a;
+      border: 1px solid #1f2937;
+      border-radius: 999px;
+      padding: 6px 12px;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .day-name {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .day-cell {
+      min-height: 70px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .day-cell:hover {
+      border-color: #3b82f6;
+    }
+
+    .day-number {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .day-label {
+      font-size: 0.7rem;
+      color: #a5b4fc;
+    }
+
+    .today {
+      border-color: #22c55e;
+    }
+
+    /* Right column */
+    .side-panel {
+      flex: 1.4;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .panel-subtitle {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid #4b5563;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      margin-bottom: 10px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      color: #9ca3af;
+      font-size: 0.8rem;
+    }
+
+    select,
+    input {
+      background: #020617;
+      border: 1px solid #4b5563;
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+    }
+
+    button.add-btn {
+      margin-top: 6px;
+      border-radius: 999px;
+      border: none;
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #22c55e, #14b8a6);
+      color: #022c22;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .overlay {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay">
+
+    <!-- LEFT: CALENDAR -->
+    <section class="calendar-wrapper card">
+      <div class="calendar-header">
+        <div>
+          <div class="month-title" id="monthTitle"></div>
+          <div class="muted">Workout Calendar</div>
+        </div>
+        <div>
+          <button class="nav-btn" id="prev">&lt;</button>
+          <button class="nav-btn" id="next">&gt;</button>
+        </div>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="day-name">Sun</div>
+        <div class="day-name">Mon</div>
+        <div class="day-name">Tue</div>
+        <div class="day-name">Wed</div>
+        <div class="day-name">Thu</div>
+        <div class="day-name">Fri</div>
+        <div class="day-name">Sat</div>
+      </div>
+
+      <div class="calendar-grid" id="days"></div>
+    </section>
+
+    <!-- RIGHT: WORKOUT + DIET -->
+    <section class="side-panel">
+
+      <!-- Workout -->
+      <div class="card">
+        <div class="panel-title">Today's Workout</div>
+        <div class="panel-subtitle" id="todayDate"></div>
+        <div class="tag" id="workoutTag"></div>
+        <ul id="workoutList"></ul>
+      </div>
+
+      <!-- Diet -->
+      <div class="card">
+        <div class="panel-title">Diet Plan</div>
+        <div class="panel-subtitle">
+          Plan meals by day. Focus on protein intake and balanced nutrition.
+        </div>
+
+        <select id="dietDay"></select>
+        <ul id="dietList"></ul>
+
+        <select id="mealType">
+          <option>Breakfast</option>
+          <option>Lunch</option>
+          <option>Dinner</option>
+          <option>Snack</option>
+        </select>
+
+        <input id="mealInput" placeholder="e.g., Chicken, rice, vegetables" />
+        <button class="add-btn" id="addMeal">Add Meal</button>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    const workouts = [
+      "Rest Day",
+      "Upper Body Strength",
+      "Lower Body Strength",
+      "Cardio 30–40 minutes",
+      "Full Body Training",
+      "HIIT & Core",
+      "Active Recovery"
+    ];
+
+    const daysEl = document.getElementById("days");
+    const todayDateEl = document.getElementById("todayDate");
+    const workoutListEl = document.getElementById("workoutList");
+    const workoutTag = document.getElementById("workoutTag");
+    const monthTitle = document.getElementById("monthTitle");
+
+    const dietDaySelect = document.getElementById("dietDay");
+    const dietList = document.getElementById("dietList");
+    const addMealBtn = document.getElementById("addMeal");
+    const mealInput = document.getElementById("mealInput");
+    const mealType = document.getElementById("mealType");
+
+    const dietData = {};
+    let current = new Date();
+
+    function renderCalendar() {
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      monthTitle.textContent = current.toLocaleString("default", {
+        month: "long",
+        year: "numeric"
+      });
+
+      daysEl.innerHTML = "";
+      const firstDay = new Date(year, month, 1).getDay();
+      const last = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) daysEl.appendChild(document.createElement("div"));
+
+      for (let d = 1; d <= last; d++) {
+        const date = new Date(year, month, d);
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.innerHTML = `
+          <div class="day-number">${d}</div>
+          <div class="day-label">${workouts[date.getDay()]}</div>
+        `;
+        cell.onclick = () => updateWorkout(date);
+        daysEl.appendChild(cell);
+      }
+    }
+
+    function updateWorkout(date) {
+      todayDateEl.textContent = date.toDateString();
+      const workout = workouts[date.getDay()];
+      workoutListEl.innerHTML = `<li>${workout}</li>`;
+      workoutTag.textContent = workout.includes("Rest") ? "Recovery" : "Training";
+    }
+
+    function setupDiet() {
+      const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      days.forEach(d => {
+        dietDaySelect.innerHTML += `<option>${d}</option>`;
+        dietData[d] = [];
+      });
+      renderDiet();
+    }
+
+    function renderDiet() {
+      const day = dietDaySelect.value;
+      dietList.innerHTML = "";
+      if (dietData[day].length === 0) {
+        dietList.innerHTML = "<li class='muted'>No meals planned yet.</li>";
+      }
+      dietData[day].forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = `${m.type}: ${m.text}`;
+        dietList.appendChild(li);
+      });
+    }
+
+    addMealBtn.onclick = () => {
+      const text = mealInput.value.trim();
+      if (!text) return;
+      dietData[dietDaySelect.value].push({ type: mealType.value, text });
+      mealInput.value = "";
+      renderDiet();
+    };
+
+    dietDaySelect.onchange = renderDiet;
+
+    document.getElementById("prev").onclick = () => {
+      current.setMonth(current.getMonth() - 1);
+      renderCalendar();
+    };
+    document.getElementById("next").onclick = () => {
+      current.setMonth(current.getMonth() + 1);
+      renderCalendar();
+    };
+
+    renderCalendar();
+    setupDiet();
+    updateWorkout(new Date());
+  </script>
+</body>
+</html>
